@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class PlayerMovementTutorial : MonoBehaviour
 {
@@ -14,6 +13,7 @@ public class PlayerMovementTutorial : MonoBehaviour
     public float jumpCooldown;
     public float airMultiplier;
     bool readyToJump;
+    public Vector3 gravityModifier;
 
     [HideInInspector] public float walkSpeed;
     [HideInInspector] public float sprintSpeed;
@@ -55,7 +55,7 @@ public class PlayerMovementTutorial : MonoBehaviour
         if (grounded)
             rb.drag = groundDrag;
         else
-            rb.drag = 0;
+            rb.drag = 1f;
     }
 
     private void FixedUpdate()
@@ -90,7 +90,7 @@ public class PlayerMovementTutorial : MonoBehaviour
 
         // in air
         else if(!grounded)
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f * airMultiplier + gravityModifier, ForceMode.Force);
     }
 
     private void SpeedControl()
@@ -110,7 +110,7 @@ public class PlayerMovementTutorial : MonoBehaviour
         // reset y velocity
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
-        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        rb.AddForce(transform.up * jumpForce + gravityModifier, ForceMode.VelocityChange);
     }
     private void ResetJump()
     {
