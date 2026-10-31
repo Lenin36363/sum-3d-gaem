@@ -1,9 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.InputSystem;
 
-public class PlayerMovementTutorial : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
+
+
     [Header("Movement")]
     public float moveSpeed;
 
@@ -15,21 +19,20 @@ public class PlayerMovementTutorial : MonoBehaviour
     bool readyToJump;
     public Vector3 gravityModifier;
 
-    [HideInInspector] public float walkSpeed;
-    [HideInInspector] public float sprintSpeed;
+    [Header("Input")]
 
-    [Header("Keybinds")]
-    public KeyCode jumpKey = KeyCode.Space;
+    public InputActionReference jumpAction;
+
+    public InputActionReference moveAction;
+    Vector2 moveInput;
+
 
     [Header("Ground Check")]
     public float playerHeight;
     public LayerMask whatIsGround;
-    bool grounded;
+    public bool grounded;
 
     public Transform orientation;
-
-    float horizontalInput;
-    float verticalInput;
 
     Vector3 moveDirection;
 
@@ -37,6 +40,9 @@ public class PlayerMovementTutorial : MonoBehaviour
 
     private void Start()
     {
+        moveAction.action.Enable();
+        jumpAction.action.Enable();
+
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
@@ -48,8 +54,11 @@ public class PlayerMovementTutorial : MonoBehaviour
         // ground check
         grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.3f, whatIsGround);
 
+        Debug.DrawLine(transform.position, new Vector3(transform.position.x, transform.position.y-(playerHeight * 0.5f + 0.3f), transform.position.z), Color.red);
+
         MyInput();
         SpeedControl();
+
 
         // handle drag
         if (grounded)
@@ -65,11 +74,10 @@ public class PlayerMovementTutorial : MonoBehaviour
 
     private void MyInput()
     {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
 
-        // when to jump
-        if(Input.GetKey(jumpKey) && readyToJump && grounded)
+        moveInput = moveAction.action.ReadValue<Vector2>();
+
+        if(jumpAction.action.IsPressed() && readyToJump && grounded)
         {
             readyToJump = false;
 
@@ -82,7 +90,7 @@ public class PlayerMovementTutorial : MonoBehaviour
     private void MovePlayer()
     {
         // calculate movement direction
-        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        moveDirection = orientation.forward * moveInput.y + orientation.right * moveInput.x;
 
         // on ground
         if(grounded)

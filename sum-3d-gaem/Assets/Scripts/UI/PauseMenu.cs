@@ -1,34 +1,50 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PauseMenu : MonoBehaviour
 {
-    [SerializeField] private Canvas canvasComp;
+    [SerializeField] private CanvasGroup canvasGroup;
     private bool isPaused;
+
+    public InputActionReference pauseAction;
 
     void Start()
     {
+        pauseAction.action.Enable();
         isPaused = false;
-        if (canvasComp == null)
-        {
-            canvasComp = GetComponent<Canvas>();
-        }
+        canvasGroup.alpha = 0f;
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (pauseAction.action.WasPressedThisFrame())
         {
-            canvasComp.enabled = !canvasComp.enabled;
             if (isPaused == false)
             {
+                Cursor.lockState = CursorLockMode.None;
+                canvasGroup.alpha = 1f;
                 Time.timeScale = 0f;
                 isPaused = true;
             }else if (isPaused == true){
+                Cursor.lockState = CursorLockMode.Locked;
+                canvasGroup.alpha = 0f;
                 Time.timeScale = 1f;
                 isPaused = false;
             }
         }
     }
+
+    public void Unpause()
+    {
+        if (isPaused == true){
+            Cursor.lockState = CursorLockMode.Locked;
+            canvasGroup.alpha = 0f;
+            Time.timeScale = 1f;
+            isPaused = false;
+        }
+    }
+
+    
 }
